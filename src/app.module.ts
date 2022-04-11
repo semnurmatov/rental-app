@@ -20,16 +20,19 @@ import { AuthModule } from './auth/auth.module';
     ConfigModule.forRoot({ isGlobal: true }),
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        dialect: 'mysql',
-        host: configService.get('HOST'),
-        port: configService.get('PORT'),
-        username: configService.get('USERNAME'),
-        password: configService.get('PASSWORD'),
-        database: configService.get('DATABASE'),
-        autoLoadModels: true,
-        synchronize: true,
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const parsed = new URL(configService.get('JAWSDB_URL'));
+        return {
+          dialect: 'mysql',
+          host: parsed.hostname,
+          port: Number(parsed.port),
+          username: parsed.username,
+          password: parsed.password,
+          database: parsed.pathname.replace('/', ''),
+          autoLoadModels: true,
+          synchronize: true,
+        };
+      },
       inject: [ConfigService],
     }),
     UserModule,
