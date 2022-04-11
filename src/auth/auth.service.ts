@@ -1,9 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { JwtPayload, Tokens } from './types';
 import * as argon from 'argon2';
-import { SignupDto } from './dto';
+import { AuthDto, SignupDto } from './dto';
+import { User } from 'src/user/user.model';
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +20,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signupLocal(body: SignupDto): Promise<Tokens> {
+  public async signupLocal(body: SignupDto): Promise<Tokens> {
     const hash = await argon.hash(body.password);
     body.password = hash;
     const user = await this.userService.createUser(body);
@@ -23,6 +31,28 @@ export class AuthService {
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
     };
+  }
+
+  public async singinLocal(body: AuthDto): Promise<Tokens> {
+    const user = await this.userService.findUserByEmail(body.email);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+    }
+
+    const passwordMatches = await argon.verify(user.password, body.password);
+
+    if (!passwordMatches) {
+      throw new ForbiddenException('Access Denied');
+    }
+    const tokens = await this.getTokens(user.userId, user.email);
+
+    await this.updateRtHash(user.userId, tokens.refresh_token);
+
+    return tokens;
+  }
+
+  public async signout(userId: number): Promise<boolean> {
+    return this.userService.updateRtHash(userId, null);
   }
 
   private async updateRtHash(userId: number, rt: string): Promise<boolean> {
@@ -36,7 +66,7 @@ export class AuthService {
     return false;
   }
 
-  private async getTokens(userId: number, email: string) {
+  private async getTokens(userId: number, email: string): Promise<Tokens> {
     const jwtPayload: JwtPayload = {
       sub: userId,
       email,

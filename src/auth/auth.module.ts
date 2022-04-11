@@ -10,7 +10,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 @Module({
   imports: [UserModule, PassportModule, JwtModule.register({})],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, AtStrategy, RtStrategy],
+  providers: [AuthService, AtStrategy, RtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

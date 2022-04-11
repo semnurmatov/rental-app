@@ -1,11 +1,17 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
+import { Op } from 'sequelize';
 import { SignupDto } from 'src/auth/dto';
 import { User } from './user.model';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User)
+    @Inject('USER_REPOSITORY')
     private userModel: typeof User,
   ) {}
 
@@ -17,20 +23,32 @@ export class UserService {
   //   return this.userModel.findAll();
   // }
 
-  // async findByLogin(user: MockUserType): Promise<MockUserType | undefined> {
-  //   const _user = users.find((element) => element.username === user.username);
-  //   if (!user) {
-  //     throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
-  //   }
-  //   const passwordCheck =
-  //   return;
-  // }
+  async findUserByEmail(email: string): Promise<User> {
+    const user = await this.userModel.findOne({ where: { email } });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+    }
+
+    return user;
+  }
+
+  async findUserById(userId: number): Promise<User> {
+    const user = await this.userModel.findOne({ where: { userId } });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+    }
+
+    return user;
+  }
 
   public async createUser(body: SignupDto): Promise<Partial<User>> {
     try {
       //check if username(email) already exists
-      const isExist = await this.userModel.findOne({ where: { email: body.email } });
-      console.log('ISEXIST', isExist);
+      const isExist = await this.userModel.findOne({
+        where: { email: body.email },
+      });
 
       if (isExist) {
         throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
@@ -55,8 +73,12 @@ export class UserService {
     }
   }
 
-  async updateRtHash(userId: number, rt: string): Promise<boolean> {
-    const user = this.userModel.findOne({ where: { userId } });
+  async updateRtHash(userId: number, rt: string | null): Promise<boolean> {
+    const user: User = await this.userModel.findOne({ where: { userId } });
+
+    if (!rt && !user.refreshToken) {
+      throw new BadRequestException('Already signed out.');
+    }
 
     if (!user) {
       throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
