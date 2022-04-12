@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { Op } from 'sequelize';
 import { SignupDto } from 'src/auth/dto';
@@ -27,7 +28,7 @@ export class UserService {
     const user = await this.userModel.findOne({ where: { email } });
 
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+      throw new NotFoundException('User not found.');
     }
 
     return user;
@@ -37,7 +38,7 @@ export class UserService {
     const user = await this.userModel.findOne({ where: { userId } });
 
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+      throw new NotFoundException('User not found.');
     }
 
     return user;
