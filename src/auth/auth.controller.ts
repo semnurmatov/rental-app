@@ -8,37 +8,40 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { Public } from '../common';
 import { AuthService } from './auth.service';
 import { AuthDto, SignupDto } from './dto';
-import { AtGuard, RtGuard } from './guards';
+import { RtGuard } from './guards';
 import { Tokens } from './types';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('local/signup')
+  @Public()
+  @Post('signup')
   public async signupLocal(@Body() body: SignupDto): Promise<Tokens> {
-    return this.authService.signupLocal(body);
+    return this.authService.signup(body);
   }
 
-  @Post('local/signin')
+  @Public()
+  @Post('signin')
   public async singinLocal(@Body() body: AuthDto): Promise<Tokens> {
-    return this.authService.singinLocal(body);
+    return this.authService.singin(body);
   }
 
-  @UseGuards(AtGuard)
   @Post('signout')
-  @HttpCode(HttpStatus.OK)
   public async signout(@Req() req: Request) {
     const user = req.user;
     return this.authService.signout(user['sub']);
   }
 
+  @Public()
   @UseGuards(RtGuard)
-  @Post('refresh-token')
+  @Post('refresh-tokens')
   @HttpCode(HttpStatus.OK)
-  public async refreshToken(@Req() req: Request) {
-    return;
+  public async refreshTokens(@Req() req: Request) {
+    const user = req.user;
+    return this.authService.refreshTokens(user['sub'], user['refreshToken']);
   }
 }

@@ -3,17 +3,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { User } from './user/user.model';
 import { UserModule } from './user/user.module';
-import { ProductController } from './product/product.controller';
 import { ProductModule } from './product/product.module';
 import { ImageController } from './image/image.controller';
-import { ImageService } from './image/image.service';
 import { ImageModule } from './image/image.module';
 import { ReviewController } from './review/review.controller';
-import { ReviewService } from './review/review.service';
 import { ReviewModule } from './review/review.module';
 import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AtGuard } from './auth/guards';
 
 @Module({
   imports: [
@@ -42,6 +40,12 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController, ImageController, ReviewController],
-  providers: [AppService, ImageService, ReviewService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AtGuard,
+    },
+  ],
 })
 export class AppModule {}

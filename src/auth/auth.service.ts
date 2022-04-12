@@ -2,17 +2,14 @@ import {
   ForbiddenException,
   HttpException,
   HttpStatus,
-  Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { JwtPayload, Tokens } from './types';
 import * as argon from 'argon2';
 import { AuthDto, SignupDto } from './dto';
-import { User } from 'src/user/user.model';
-import { InjectModel } from '@nestjs/sequelize';
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -20,7 +17,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  public async signupLocal(body: SignupDto): Promise<Tokens> {
+  public async signup(body: SignupDto): Promise<Tokens> {
     const hash = await argon.hash(body.password);
     body.password = hash;
     const user = await this.userService.createUser(body);
@@ -33,10 +30,10 @@ export class AuthService {
     };
   }
 
-  public async singinLocal(body: AuthDto): Promise<Tokens> {
+  public async singin(body: AuthDto): Promise<Tokens> {
     const user = await this.userService.findUserByEmail(body.email);
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+      throw new NotFoundException('User not found.');
     }
 
     const passwordMatches = await argon.verify(user.password, body.password);
@@ -64,6 +61,25 @@ export class AuthService {
       return true;
     }
     return false;
+  }
+
+  public async refreshTokens(userId: number, rt: string): Promise<Tokens> {
+    const user = await this.userService.findUserById(userId);
+    if (!user || !user.refreshToken) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    const rtMatches = await argon.verify(user.refreshToken, rt);
+    if (!rtMatches) {
+      throw new ForbiddenException('Access Denied');
+    }
+    const tokens = await this.getTokens(user.userId, user.email);
+    const updateRt = await this.updateRtHash(user.userId, tokens.refresh_token);
+
+    if (!updateRt) {
+      throw new HttpException('Something went wrong.', HttpStatus.BAD_REQUEST);
+    }
+    return tokens;
   }
 
   private async getTokens(userId: number, email: string): Promise<Tokens> {
