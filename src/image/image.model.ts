@@ -1,6 +1,5 @@
 import {
   AllowNull,
-  AutoIncrement,
   BelongsTo,
   Column,
   ForeignKey,
@@ -16,14 +15,13 @@ import { Product } from 'src/product/product.model';
 export class Image extends Model {
   @PrimaryKey
   @IsUUID(4)
-  @AutoIncrement
   @Column
-  imageId: number;
+  imageId: string;
 
   @ForeignKey(() => Product)
   @AllowNull(false)
   @Column({ onUpdate: 'CASCADE' })
-  productId: number;
+  productId: string;
 
   @AllowNull(false)
   @IsUrl

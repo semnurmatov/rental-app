@@ -10,6 +10,9 @@ import { UserService } from 'src/user/user.service';
 import { JwtPayload, Tokens } from './types';
 import * as argon from 'argon2';
 import { AuthDto, SignupDto } from './dto';
+import * as uuid from 'uuid';
+import { CreateUserDto } from 'src/user/types/create-user.dto';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -18,41 +21,63 @@ export class AuthService {
   ) {}
 
   public async signup(body: SignupDto): Promise<Tokens> {
-    const hash = await argon.hash(body.password);
-    body.password = hash;
-    const user = await this.userService.createUser(body);
+    const _body = new Object({});
+    Object.assign(_body, body);
 
-    const tokens: Tokens = await this.getTokens(user.userId, user.email);
+    const userId = uuid.v4();
+    const hash = await argon.hash(body.password);
+    Object.assign(_body, { userId, password: hash });
+
+    const user = await this.userService.createUser(_body as CreateUserDto);
+    if (!user) {
+      throw new HttpException('Current email is already exist.', HttpStatus.OK);
+    }
+
+    const tokens: Tokens = await this.getTokens({
+      sub: user.userId,
+      email: user.email,
+      name: user.firstName,
+    });
+
     await this.updateRtHash(user.userId, tokens.refresh_token);
+
     return {
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
     };
   }
 
-  public async singin(body: AuthDto): Promise<Tokens> {
-    const user = await this.userService.findUserByEmail(body.email);
+  public async signin(body: AuthDto): Promise<Tokens> {
+    const user = await this.userService.getUserByEmail(body.email);
     if (!user) {
       throw new NotFoundException('User not found.');
     }
-
-    const passwordMatches = await argon.verify(user.password, body.password);
+    let passwordMatches;
+    try {
+      passwordMatches = await argon.verify(user.password, body.password);
+    } catch (err) {
+      console.log(err);
+    }
 
     if (!passwordMatches) {
       throw new ForbiddenException('Access Denied');
     }
-    const tokens = await this.getTokens(user.userId, user.email);
+    const tokens = await this.getTokens({
+      sub: user.userId,
+      email: user.email,
+      name: user.firstName,
+    });
 
     await this.updateRtHash(user.userId, tokens.refresh_token);
 
     return tokens;
   }
 
-  public async signout(userId: number): Promise<boolean> {
+  public async signout(userId: string): Promise<boolean> {
     return this.userService.updateRtHash(userId, null);
   }
 
-  private async updateRtHash(userId: number, rt: string): Promise<boolean> {
+  private async updateRtHash(userId: string, rt: string): Promise<boolean> {
     const hash = await argon.hash(rt);
 
     const isUpdated = await this.userService.updateRtHash(userId, hash);
@@ -63,8 +88,8 @@ export class AuthService {
     return false;
   }
 
-  public async refreshTokens(userId: number, rt: string): Promise<Tokens> {
-    const user = await this.userService.findUserById(userId);
+  public async refreshTokens(userId: string, rt: string): Promise<Tokens> {
+    const user = await this.userService.getUserById(userId);
     if (!user || !user.refreshToken) {
       throw new ForbiddenException('Access Denied');
     }
@@ -73,7 +98,11 @@ export class AuthService {
     if (!rtMatches) {
       throw new ForbiddenException('Access Denied');
     }
-    const tokens = await this.getTokens(user.userId, user.email);
+    const tokens = await this.getTokens({
+      sub: user.userId,
+      email: user.email,
+      name: user.firstName,
+    });
     const updateRt = await this.updateRtHash(user.userId, tokens.refresh_token);
 
     if (!updateRt) {
@@ -82,20 +111,16 @@ export class AuthService {
     return tokens;
   }
 
-  private async getTokens(userId: number, email: string): Promise<Tokens> {
-    const jwtPayload: JwtPayload = {
-      sub: userId,
-      email,
-    };
+  private async getTokens(payload: JwtPayload): Promise<Tokens> {
     const [at, rt] = await Promise.all([
-      this.jwtService.signAsync(jwtPayload, {
+      this.jwtService.signAsync(payload, {
         secret: process.env.AT_SECRET,
-        expiresIn: '15m',
+        expiresIn: '12h',
       }),
 
-      this.jwtService.signAsync(jwtPayload, {
+      this.jwtService.signAsync(payload, {
         secret: process.env.RT_SECRET,
-        expiresIn: '7d',
+        expiresIn: '15d',
       }),
     ]);
 
