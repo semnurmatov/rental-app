@@ -1,9 +1,6 @@
-import { isUUID } from 'class-validator';
 import {
   AllowNull,
-  AutoIncrement,
   BelongsTo,
-  BelongsToMany,
   Column,
   DataType,
   ForeignKey,
@@ -11,6 +8,7 @@ import {
   Model,
   PrimaryKey,
   Table,
+  Unique,
 } from 'sequelize-typescript';
 import { Product } from 'src/product/product.model';
 import { User } from 'src/user/user.model';
@@ -19,24 +17,23 @@ import { User } from 'src/user/user.model';
 export class Review extends Model {
   @PrimaryKey
   @IsUUID(4)
-  @AutoIncrement
   @Column
-  reviewId: number;
+  reviewId: string;
 
   @ForeignKey(() => User)
   @AllowNull(false)
   @Column({ onUpdate: 'CASCADE' })
-  ownerId: number;
+  ownerId: string;
 
   @ForeignKey(() => User)
   @AllowNull(false)
   @Column({ onUpdate: 'CASCADE' })
-  reviewerId: number;
+  reviewerId: string;
 
   @ForeignKey(() => Product)
   @AllowNull(false)
   @Column({ onUpdate: 'CASCADE' })
-  productId: number;
+  productId: string;
 
   @Column(DataType.STRING(4000))
   comments: string;

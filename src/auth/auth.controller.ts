@@ -14,23 +14,24 @@ import { AuthDto, SignupDto } from './dto';
 import { RtGuard } from './guards';
 import { Tokens } from './types';
 
-@Controller('auth')
+@Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  @Post('signup')
-  public async signupLocal(@Body() body: SignupDto): Promise<Tokens> {
+  @Post('/signup')
+  public async signup(@Body() body: SignupDto): Promise<Tokens> {
     return this.authService.signup(body);
   }
 
   @Public()
-  @Post('signin')
-  public async singinLocal(@Body() body: AuthDto): Promise<Tokens> {
-    return this.authService.singin(body);
+  @Post('/signin')
+  public async singin(@Body() body: AuthDto): Promise<Tokens> {
+    return this.authService.signin(body);
   }
 
-  @Post('signout')
+  @Post('/signout')
+  @HttpCode(HttpStatus.OK)
   public async signout(@Req() req: Request) {
     const user = req.user;
     return this.authService.signout(user['sub']);
@@ -38,7 +39,7 @@ export class AuthController {
 
   @Public()
   @UseGuards(RtGuard)
-  @Post('refresh-tokens')
+  @Post('/refresh-tokens')
   @HttpCode(HttpStatus.OK)
   public async refreshTokens(@Req() req: Request) {
     const user = req.user;

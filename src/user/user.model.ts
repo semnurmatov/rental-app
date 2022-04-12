@@ -1,6 +1,5 @@
 import {
   AllowNull,
-  AutoIncrement,
   Column,
   HasMany,
   IsDate,
@@ -17,11 +16,10 @@ import { GenderType } from './types/gender.type';
 
 @Table
 export class User extends Model {
-  @IsUUID(4)
   @PrimaryKey
-  @AutoIncrement
+  @IsUUID(4)
   @Column
-  userId: number;
+  userId: string;
 
   @AllowNull(false)
   @Unique

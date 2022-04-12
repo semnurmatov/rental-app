@@ -1,25 +1,39 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
-import { AuthService } from 'src/auth/auth.service';
-import { User } from './user.model';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+} from '@nestjs/common';
+import { GetUserDto } from './types';
+import { UpdateUserDto } from './types/update-user.dto';
 import { UserService } from './user.service';
 
-@Controller()
+@Controller('/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @Post()
-  // async createUser(@Body() createUser: UserType): Promise<User> {
-  //   const userModel = this.userService.createUser(createUser);
-  //   console.log('User: ', userModel);
+  @Get('/:userId')
+  @HttpCode(HttpStatus.OK)
+  public async getUser(@Param('userId') userId: string): Promise<GetUserDto> {
+    return this.userService.getUser(userId);
+  }
 
-  //   return userModel;
-  // }
+  @Patch('/:userId')
+  @HttpCode(HttpStatus.OK)
+  public async updateUser(
+    @Param('userId') userId: string,
+    @Body() body: Partial<UpdateUserDto>,
+  ): Promise<GetUserDto> {
+    return this.userService.updateUser(userId, body);
+  }
 
-  // @Post('/register')
-  // public async register(@Body() body: RegisterBody): Promise<void> {
-  //   const register = await this.userService.register(
-  //     body.username,
-  //     body.password,
-  //   );
-  // }
+  @Delete('/:userId')
+  @HttpCode(HttpStatus.OK)
+  public async deleteUser(@Param('userId') userId: string): Promise<boolean> {
+    return this.userService.deleteUser(userId);
+  }
 }
