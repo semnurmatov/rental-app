@@ -6,22 +6,24 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { GetUserDto } from './types';
-import { CreateUserDto } from './types/create-user.dto';
-import { UpdateUserDto } from './types/update-user.dto';
+import { USER_REPOSITORY } from './constants';
+import { CreateUserDto, GetUserDto, UpdateUserDto } from './dto';
 import { UserFactory } from './user.factory';
 import { User } from './user.model';
 @Injectable()
 export class UserService {
   constructor(
-    @Inject('USER_REPOSITORY')
-    private userModel: typeof User,
+    @Inject(USER_REPOSITORY)
+    private userRepository: typeof User,
     private readonly userFactory: UserFactory,
   ) {}
 
   async getUser(userId: string): Promise<GetUserDto> {
-    const user: User = await this.getUserById(userId);
+    const user = await this.userRepository.findOne({ where: { userId } });
 
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
     return this.userFactory.format(user);
   }
 
@@ -29,6 +31,12 @@ export class UserService {
     userId: string,
     body: Partial<UpdateUserDto>,
   ): Promise<GetUserDto> {
+    const user = await this.userRepository.findOne({ where: { userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
     const _body = new Object({});
     if (body.firstName) {
       Object.assign(_body, { firstName: body.firstName });
@@ -51,24 +59,28 @@ export class UserService {
         longitude: body.longitude,
       });
     }
-    const updateUser = await this.userModel.update(_body, {
+    const update = await this.userRepository.update(_body, {
       where: { userId },
     });
-    const user = await this.getUserById(userId);
-    if (updateUser[0] < 1 || !user) {
+
+    const updatedUser = await this.userRepository.findOne({
+      where: { userId },
+    });
+
+    if (update[0] < 1 || !updatedUser) {
       throw new HttpException('Something went wrong', HttpStatus.BAD_REQUEST);
     }
-    return this.userFactory.format(user);
+    return this.userFactory.format(updatedUser);
   }
 
   async deleteUser(userId: string): Promise<boolean> {
-    const user = await this.userModel.findOne({ where: { userId } });
+    const user = await this.userRepository.findOne({ where: { userId } });
 
     if (!user) {
       throw new NotFoundException('User not found.');
     }
 
-    const deleteUser = await this.userModel.destroy({ where: { userId } });
+    const deleteUser = await this.userRepository.destroy({ where: { userId } });
 
     if (deleteUser > 0) {
       return true;
@@ -78,7 +90,7 @@ export class UserService {
   }
 
   async getUserByEmail(email: string): Promise<User> {
-    const user = await this.userModel.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({ where: { email } });
 
     if (!user) {
       throw new NotFoundException('User not found.');
@@ -88,7 +100,7 @@ export class UserService {
   }
 
   async getUserById(userId: string): Promise<User> {
-    const user = await this.userModel.findOne({ where: { userId } });
+    const user = await this.userRepository.findOne({ where: { userId } });
 
     if (!user) {
       throw new NotFoundException('User not found.');
@@ -100,7 +112,7 @@ export class UserService {
   public async createUser(body: CreateUserDto): Promise<Partial<User>> {
     try {
       //check if username(email) already exists
-      const isExist = await this.userModel.findOne({
+      const isExist = await this.userRepository.findOne({
         where: { email: body.email },
       });
 
@@ -108,7 +120,7 @@ export class UserService {
         throw new HttpException('User already exists.', HttpStatus.BAD_REQUEST);
       }
 
-      const user: User = await this.userModel.create({
+      const user: User = await this.userRepository.create({
         userId: body.userId,
         email: body.email,
         password: body.password,
@@ -129,17 +141,17 @@ export class UserService {
   }
 
   async updateRtHash(userId: string, rt: string | null): Promise<boolean> {
-    const user: User = await this.userModel.findOne({ where: { userId } });
-
-    if (!rt && !user.refreshToken) {
-      throw new BadRequestException('Already signed out.');
-    }
+    const user: User = await this.userRepository.findOne({ where: { userId } });
 
     if (!user) {
       throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
     }
 
-    const updatedUser = await this.userModel.update(
+    if (!rt && !user.refreshToken) {
+      throw new BadRequestException('Already signed out.');
+    }
+
+    const updatedUser = await this.userRepository.update(
       { refreshToken: rt },
       { where: { userId } },
     );

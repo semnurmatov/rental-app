@@ -35,6 +35,9 @@ export class Product extends Model {
   @Column(DataType.STRING(3000))
   description: string;
 
+  @Column
+  price: number;
+
   @BelongsTo(() => User)
   user: User;
 

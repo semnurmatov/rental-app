@@ -6,12 +6,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
 import { JwtPayload, Tokens } from './types';
 import * as argon from 'argon2';
 import { AuthDto, SignupDto } from './dto';
 import * as uuid from 'uuid';
-import { CreateUserDto } from 'src/user/types/create-user.dto';
+import { CreateUserDto } from '../user/dto';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
