@@ -1,4 +1,4 @@
-import { GetUserDto } from './types';
+import { GetUserDto } from './dto';
 import { User } from './user.model';
 
 export class UserFactory {

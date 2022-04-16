@@ -10,8 +10,8 @@ import {
   Table,
   Unique,
 } from 'sequelize-typescript';
-import { Product } from 'src/product/product.model';
-import { Review } from 'src/review/review.model';
+import { Product } from '../product/product.model';
+import { Review } from '../review/review.model';
 import { GenderType } from './types/gender.type';
 
 @Table
