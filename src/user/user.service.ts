@@ -109,7 +109,7 @@ export class UserService {
     return user;
   }
 
-  public async createUser(body: CreateUserDto): Promise<Partial<User>> {
+  public async createUser(body: CreateUserDto): Promise<User> {
     try {
       //check if username(email) already exists
       const isExist = await this.userRepository.findOne({
