@@ -30,6 +30,7 @@
     "@nestjs/sequelize": "^8.0.0",
     "argon2": "^0.28.5",
     "class-transformer": "^0.5.1",
+    "cloudinary": "^1.29.0",
     "mysql2": "^2.3.3",
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",

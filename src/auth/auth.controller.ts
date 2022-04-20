@@ -12,7 +12,7 @@ import { Public } from '../common';
 import { AuthService } from './auth.service';
 import { AuthDto, SignupDto } from './dto';
 import { RtGuard } from './guards';
-import { Tokens } from './types';
+import { SignInResponse } from './types';
 
 @Controller('/auth')
 export class AuthController {
@@ -20,13 +20,13 @@ export class AuthController {
 
   @Public()
   @Post('/signup')
-  public async signup(@Body() body: SignupDto): Promise<Tokens> {
+  public async signup(@Body() body: SignupDto): Promise<SignInResponse> {
     return this.authService.signup(body);
   }
 
   @Public()
   @Post('/signin')
-  public async singin(@Body() body: AuthDto): Promise<Tokens> {
+  public async singin(@Body() body: AuthDto): Promise<SignInResponse> {
     return this.authService.signin(body);
   }
 

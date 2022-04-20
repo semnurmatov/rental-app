@@ -6,21 +6,23 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload, Tokens } from './types';
+import { JwtPayload, SignInResponse, Tokens } from './types';
 import * as argon from 'argon2';
 import { AuthDto, SignupDto } from './dto';
 import * as uuid from 'uuid';
 import { CreateUserDto } from '../user/dto';
 import { UserService } from '../user/user.service';
+import { UserFactory } from '../user/user.factory';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
+    private userFactory: UserFactory,
     private jwtService: JwtService,
   ) {}
 
-  public async signup(body: SignupDto): Promise<Tokens> {
+  public async signup(body: SignupDto): Promise<SignInResponse> {
     const _body = new Object({});
     Object.assign(_body, body);
 
@@ -40,14 +42,13 @@ export class AuthService {
     });
 
     await this.updateRtHash(user.userId, tokens.refresh_token);
+    
+    const formattedUser = await this.userFactory.format(user);
 
-    return {
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token,
-    };
+    return { tokens, user: formattedUser };
   }
 
-  public async signin(body: AuthDto): Promise<Tokens> {
+  public async signin(body: AuthDto): Promise<SignInResponse> {
     const user = await this.userService.getUserByEmail(body.email);
     if (!user) {
       throw new NotFoundException('User not found.');
@@ -69,8 +70,9 @@ export class AuthService {
     });
 
     await this.updateRtHash(user.userId, tokens.refresh_token);
+    const formattedUser = await this.userFactory.format(user);
 
-    return tokens;
+    return { tokens, user: formattedUser };
   }
 
   public async signout(userId: string): Promise<boolean> {
