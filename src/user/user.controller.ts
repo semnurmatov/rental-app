@@ -7,7 +7,12 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FOLDERS } from 'src/image/cloudinary/constants';
 import { GetUserDto, UpdateUserDto } from './dto';
 import { UserService } from './user.service';
 
@@ -19,6 +24,12 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   public async getUser(@Param('userId') userId: string): Promise<GetUserDto> {
     return this.userService.getUser(userId);
+  }
+
+  @Post('/image')
+  @UseInterceptors(FileInterceptor('file'))
+  public async uploadUsersImage(@UploadedFile() file: Express.Multer.File) {
+    return this.userService.uploadImage(file, FOLDERS.USERS);
   }
 
   @Patch('/:userId')

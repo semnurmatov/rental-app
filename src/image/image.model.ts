@@ -10,6 +10,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { Product } from 'src/product/product.model';
+import { User } from 'src/user/user.model';
 
 @Table
 export class Image extends Model {
@@ -19,9 +20,12 @@ export class Image extends Model {
   imageId: string;
 
   @ForeignKey(() => Product)
-  @AllowNull(false)
   @Column({ onUpdate: 'CASCADE' })
   productId: string;
+
+  @ForeignKey(() => User)
+  @Column({ onUpdate: 'CASCADE' })
+  userId: string;
 
   @AllowNull(false)
   @IsUrl

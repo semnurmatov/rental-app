@@ -6,6 +6,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { UploadApiResponse } from 'cloudinary';
+import { FOLDERS } from 'src/image/cloudinary/constants';
+import { ImageService } from 'src/image/image.service';
 import { USER_REPOSITORY } from './constants';
 import { CreateUserDto, GetUserDto, UpdateUserDto } from './dto';
 import { UserFactory } from './user.factory';
@@ -16,6 +19,7 @@ export class UserService {
     @Inject(USER_REPOSITORY)
     private userRepository: typeof User,
     private readonly userFactory: UserFactory,
+    private readonly imageService: ImageService,
   ) {}
 
   async getUser(userId: string): Promise<GetUserDto> {
@@ -140,6 +144,14 @@ export class UserService {
     }
   }
 
+  async uploadImage(
+    file: Express.Multer.File,
+    folder: FOLDERS,
+  ): Promise<UploadApiResponse> {
+    const uploadedImage = this.imageService.uploadImage(file, folder);
+
+    return uploadedImage;
+  }
   async updateRtHash(userId: string, rt: string | null): Promise<boolean> {
     const user: User = await this.userRepository.findOne({ where: { userId } });
 
