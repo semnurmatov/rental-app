@@ -1,69 +1,69 @@
-import {
-  AllowNull,
-  Column,
-  HasMany,
-  IsDate,
-  IsUrl,
-  IsUUID,
-  Model,
-  PrimaryKey,
-  Table,
-  Unique,
-} from 'sequelize-typescript';
-import { Product } from '../product/product.model';
-import { Review } from '../review/review.model';
-import { GenderType } from './types/gender.type';
+// import {
+//   AllowNull,
+//   Column,
+//   HasMany,
+//   IsDate,
+//   IsUrl,
+//   IsUUID,
+//   Model,
+//   PrimaryKey,
+//   Table,
+//   Unique,
+// } from 'sequelize-typescript';
+// import { Product } from '../product/product.model';
+// import { Review } from '../review/review.model';
+// import { GenderType } from './types/gender.type';
 
-@Table
-export class User extends Model {
-  @PrimaryKey
-  @IsUUID(4)
-  @Column
-  userId: string;
+// @Table
+// export class User extends Model {
+//   @PrimaryKey
+//   @IsUUID(4)
+//   @Column
+//   userId: string;
 
-  @AllowNull(false)
-  @Unique
-  @Column
-  email: string;
+//   @AllowNull(false)
+//   @Unique
+//   @Column
+//   email: string;
 
-  @AllowNull(false)
-  @Column
-  password: string;
+//   @AllowNull(false)
+//   @Column
+//   password: string;
 
-  @AllowNull(false)
-  @Column
-  firstName: string;
+//   @AllowNull(false)
+//   @Column
+//   firstName: string;
 
-  @AllowNull(false)
-  @Column
-  lastName: string;
+//   @AllowNull(false)
+//   @Column
+//   lastName: string;
 
-  @Column
-  phoneNumber: string;
+//   @Column
+//   phoneNumber: string;
 
-  @Column({ values: [GenderType.Male, GenderType.Female, GenderType.Other] })
-  gender: string;
+//   @Column({ values: [GenderType.Male, GenderType.Female, GenderType.Other] })
+//   gender: string;
 
-  @IsDate
-  @Column
-  birthDate: string;
+//   @IsDate
+//   @Column
+//   birthDate: string;
 
-  @IsUrl
-  @Column
-  avatar: string;
+//   @IsUrl
+//   @Column
+//   avatar: string;
 
-  @Column
-  lattitude: string;
+//   @Column
+//   latitude: string;
 
-  @Column
-  longitude: string;
+//   @Column
+//   longitude: string;
 
-  @Column
-  refreshToken: string;
+//   @Column
+//   refreshToken: string;
 
-  @HasMany(() => Product)
-  products: Product[];
+//   @HasMany(() => Product)
+//   products: Product[];
 
-  @HasMany(() => Review)
-  reviews: Review[];
-}
+//   @HasMany(() => Review)
+//   reviews: Review[];
+// }

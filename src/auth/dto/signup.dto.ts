@@ -1,4 +1,12 @@
-import { IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
+import {
+  IsDate,
+  IsDateString,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUrl,
+} from 'class-validator';
 
 export class SignupDto {
   @IsNotEmpty()
@@ -26,7 +34,7 @@ export class SignupDto {
   gender: string;
 
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   birthDate: string;
 
   @IsOptional()
@@ -35,7 +43,7 @@ export class SignupDto {
 
   @IsOptional()
   @IsString()
-  lattitude: string;
+  latitude: string;
 
   @IsOptional()
   @IsString()

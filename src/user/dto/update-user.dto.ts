@@ -1,41 +1,34 @@
+import { Gender } from '@prisma/client';
 import {
   IsDate,
   IsNotEmpty,
   IsOptional,
+  IsPhoneNumber,
   IsString,
   IsUrl,
 } from 'class-validator';
 
 export class UpdateUserDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   firstName: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   lastName: string;
 
   @IsOptional()
-  @IsString()
+  @IsPhoneNumber()
   phoneNumber: string;
 
   @IsOptional()
   @IsString()
-  gender: string;
+  gender: Gender;
 
   @IsOptional()
-  @IsDate()
   birthDate: string;
 
   @IsOptional()
   @IsUrl()
   avatar: string;
-
-  @IsOptional()
-  @IsString()
-  lattitude: string;
-
-  @IsOptional()
-  @IsString()
-  longitude: string;
 }

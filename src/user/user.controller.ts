@@ -16,34 +16,28 @@ import { FOLDERS } from 'src/image/cloudinary/constants';
 import { GetUserDto, UpdateUserDto } from './dto';
 import { UserService } from './user.service';
 
-@Controller('/user')
+@Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/:userId')
+  @Get('/:id')
   @HttpCode(HttpStatus.OK)
-  public async getUser(@Param('userId') userId: string): Promise<GetUserDto> {
-    return this.userService.getUser(userId);
+  public async getUser(@Param('id') id: string): Promise<GetUserDto> {
+    return this.userService.getUser(id);
   }
 
-  @Post('/image')
-  @UseInterceptors(FileInterceptor('file'))
-  public async uploadUsersImage(@UploadedFile() file: Express.Multer.File) {
-    return this.userService.uploadImage(file, FOLDERS.USERS);
-  }
-
-  @Patch('/:userId')
+  @Patch('/:id')
   @HttpCode(HttpStatus.OK)
   public async updateUser(
-    @Param('userId') userId: string,
-    @Body() body: Partial<UpdateUserDto>,
+    @Param('id') id: string,
+    @Body() data: UpdateUserDto,
   ): Promise<GetUserDto> {
-    return this.userService.updateUser(userId, body);
+    return this.userService.updateUser(id, data);
   }
 
-  @Delete('/:userId')
+  @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  public async deleteUser(@Param('userId') userId: string): Promise<boolean> {
-    return this.userService.deleteUser(userId);
+  public async deleteUser(@Param('id') id: string): Promise<GetUserDto> {
+    return this.userService.deleteUser(id);
   }
 }

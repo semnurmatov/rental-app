@@ -1,8 +1,9 @@
+import { Gender } from '@prisma/client';
 import {
-  IsDate,
   IsEmail,
   IsNotEmpty,
   IsOptional,
+  IsPhoneNumber,
   IsString,
   IsUrl,
   IsUUID,
@@ -12,7 +13,7 @@ export class GetUserDto {
   @IsNotEmpty()
   @IsUUID(4)
   @IsString()
-  userId: string;
+  id: string;
 
   @IsNotEmpty()
   @IsEmail()
@@ -27,26 +28,17 @@ export class GetUserDto {
   lastName: string;
 
   @IsOptional()
-  @IsString()
+  @IsPhoneNumber()
   phoneNumber: string;
 
   @IsOptional()
   @IsString()
-  gender: string;
+  gender: Gender;
 
   @IsOptional()
-  @IsDate()
   birthDate: string;
 
   @IsOptional()
   @IsUrl()
   avatar: string;
-
-  @IsOptional()
-  @IsString()
-  lattitude: string;
-
-  @IsOptional()
-  @IsString()
-  longitude: string;
 }

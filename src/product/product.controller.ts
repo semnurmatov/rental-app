@@ -16,40 +16,42 @@ import { ProductService } from './product.service';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @Post()
-  public async createProduct(@Body() body: CreateProductDto) {
-    return this.productService.createProduct(body);
-  }
+  // @Post()
+  // public async createProduct(@Body() body: CreateProductDto) {
+  //   return this.productService.createProduct(body);
+  // }
 
-  @Patch('/:productId')
-  @HttpCode(HttpStatus.OK)
-  public async updateProduct(
-    @Param('productId') productId: string,
-    @Body() body: Partial<UpdateProductDto>,
-  ) {
-    return this.productService.updateProduct(productId, body);
-  }
+  // @Patch('/:productId')
+  // @HttpCode(HttpStatus.OK)
+  // public async updateProduct(
+  //   @Param('productId') productId: string,
+  //   @Body() body: Partial<UpdateProductDto>,
+  // ) {
+  //   return this.productService.updateProduct(productId, body);
+  // }
 
-  @Delete('/:productId')
-  public async deteleProduct(@Param('productId') productId: string) {
-    return this.productService.deleteProduct(productId);
-  }
+  // @Delete('/:productId')
+  // public async deteleProduct(@Param('productId') productId: string) {
+  //   return this.productService.deleteProduct(productId);
+  // }
 
   @Get('/:productId')
   @HttpCode(HttpStatus.OK)
   public async getProduct(@Param('productId') productId: string) {
+    console.log(123);
+    
     return this.productService.getProduct(productId);
   }
 
-  @Get('/user-products/:userId')
-  @HttpCode(HttpStatus.OK)
-  public async getUserProducts(@Param('userId') userId: string) {
-    return this.productService.getUserProducts(userId);
-  }
+  // // @Get('/user-products/:userId')
+  // // @HttpCode(HttpStatus.OK)
+  // // public async getUserProducts(@Param('userId') userId: string) {
+  // //   return this.productService.getUserProducts(userId);
+  // // }
 
-  @Get()
-  @HttpCode(HttpStatus.OK)
-  public async getAllProducts() {
-    return this.productService.getAllProducts();
-  }
+  // @Get()
+  // @HttpCode(HttpStatus.OK)
+  // public async getAllProducts() {
+  //   return this.productService.getAllProducts();
+  // }
 }

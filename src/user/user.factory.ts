@@ -1,19 +1,19 @@
+import { User } from '@prisma/client';
 import { GetUserDto } from './dto';
-import { User } from './user.model';
 
 export class UserFactory {
   async format(user: User): Promise<GetUserDto> {
+    // const date = user.birthDate.toLocaleDateString(); ????
+
     return {
-      userId: user.userId,
+      id: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
       phoneNumber: user.phoneNumber,
       gender: user.gender,
-      birthDate: user.birthDate,
+      birthDate: user.birthDate?.toLocaleDateString(),
       avatar: user.avatar,
-      lattitude: user.lattitude,
-      longitude: user.longitude,
     };
   }
 }

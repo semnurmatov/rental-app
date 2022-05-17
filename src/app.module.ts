@@ -16,23 +16,6 @@ import { AtGuard } from './auth/guards';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    SequelizeModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        const parsed = new URL(configService.get('JAWSDB_URL'));
-        return {
-          dialect: 'mysql',
-          host: parsed.hostname,
-          port: Number(parsed.port),
-          username: parsed.username,
-          password: parsed.password,
-          database: parsed.pathname.replace('/', ''),
-          autoLoadModels: true,
-          synchronize: true,
-        };
-      },
-      inject: [ConfigService],
-    }),
     UserModule,
     ProductModule,
     ImageModule,

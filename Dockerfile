@@ -4,11 +4,15 @@ WORKDIR /app
 
 COPY package.json yarn.lock ./
 
+COPY prisma ./prisma/
+
 RUN yarn --frozen-lockfile
 
 COPY . .
 
 RUN yarn build
+
+RUN yarn prisma generate
 
 CMD ["yarn", "start:prod"]
 

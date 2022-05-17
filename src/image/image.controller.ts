@@ -15,7 +15,6 @@ import { ImageService } from './image.service';
 @Controller('')
 export class ImageController {
   constructor(private readonly imageService: ImageService) {}
-
   // @Public()
   // @Post('/image')
   // @UseInterceptors(FileInterceptor('file'))
@@ -25,7 +24,6 @@ export class ImageController {
   // ) {
   //   return this.imageService.uploadImage(file, folder);
   // }
-
   // @Post('/images')
   // @UseInterceptors(FilesInterceptor('files'))
   // public async uploadImages(

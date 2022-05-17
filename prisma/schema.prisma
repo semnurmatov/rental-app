@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model User{
+  id String @id @default(uuid())
+  email String @unique
+  password String
+  firstName String
+  lastName String
+  phoneNumber String?
+  gender Gender? @default(other)
+  birthDate DateTime? @db.Date 
+  avatar String?
+  refreshToken String?
+
+  // Relation fields
+  products Product[]
+  reviews Review[]
+  // image Image?
+  locations Location[]
+}
+
+model Product{
+  id String @id @default(uuid())
+  title String
+  description String? @db.VarChar(3000)
+  price Float?
+
+  // Relation fields
+  author User @relation(fields: [authorId], references: [id])
+  authorId String
+  images Image[]
+  reviews Review[]
+}
+
+model Review{
+  id String @id @default(uuid())
+  comments String @db.VarChar(4000)
+
+  // Relation fields
+  author User @relation(fields: [authorId], references: [id])
+  authorId String
+  product Product @relation(fields: [productId], references: [id])
+  productId String
+}
+
+model Location {
+  id String @id @default(uuid())
+  latitude Float
+  longitude Float
+
+  // Relation fields
+  user User @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model Image{
+  id String @id @default(uuid())
+  url String
+
+  // Relation fields
+  product Product? @relation(fields: [productId], references: [id])
+  productId String
+
+  // user User? @relation(fields: [userId], references: [id])
+  // userId String
+}
+
+enum Gender{
+  male
+  female
+  other
+}

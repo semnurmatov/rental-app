@@ -6,7 +6,6 @@ import { FileSystemService } from './cloudinary/file-system.service';
 import { ImageController } from './image.controller';
 import { ImageService } from './image.service';
 import { CloudinaryProvider } from './cloudinary/cloudinary.provider';
-import { Image } from './image.model';
 
 @Module({
   imports: [
@@ -15,7 +14,7 @@ import { Image } from './image.model';
         storage: memoryStorage(),
       }),
     }),
-    SequelizeModule.forFeature([Image]),
+    // SequelizeModule.forFeature([Image]),
   ],
   controllers: [ImageController],
   providers: [ImageService, FileSystemService, CloudinaryProvider],
