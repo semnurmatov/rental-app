@@ -1,10 +1,9 @@
 import { User } from '@prisma/client';
+import { formatDate } from 'src/utils/functions';
 import { GetUserDto } from './dto';
 
 export class UserFactory {
   async format(user: User): Promise<GetUserDto> {
-    // const date = user.birthDate.toLocaleDateString(); ????
-
     return {
       id: user.id,
       email: user.email,
@@ -12,7 +11,7 @@ export class UserFactory {
       lastName: user.lastName,
       phoneNumber: user.phoneNumber,
       gender: user.gender,
-      birthDate: user.birthDate?.toLocaleDateString(),
+      birthDate: formatDate(user.birthDate),
       avatar: user.avatar,
     };
   }

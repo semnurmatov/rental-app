@@ -1,5 +1,6 @@
 import { Gender } from '@prisma/client';
 import {
+  IsDateString,
   IsEmail,
   IsNotEmpty,
   IsOptional,
@@ -42,6 +43,7 @@ export class CreateUserDto {
   gender: Gender;
 
   @IsOptional()
+  @IsDateString()
   birthDate: string;
 
   @IsOptional()

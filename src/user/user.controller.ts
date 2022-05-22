@@ -7,7 +7,6 @@ import {
   HttpStatus,
   Param,
   Patch,
-  Post,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -26,13 +25,20 @@ export class UserController {
     return this.userService.getUser(id);
   }
 
-  @Patch('/:id')
+  @Patch()
   @HttpCode(HttpStatus.OK)
-  public async updateUser(
+  public async updateUser(@Body() data: UpdateUserDto): Promise<GetUserDto> {
+    return this.userService.updateUser(data);
+  }
+
+  @Patch('/avatar/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor('file'))
+  public async updateUserAvatar(
     @Param('id') id: string,
-    @Body() data: UpdateUserDto,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<GetUserDto> {
-    return this.userService.updateUser(id, data);
+    return this.userService.uploadUserAvatar(id, file);
   }
 
   @Delete('/:id')

@@ -22,8 +22,10 @@ export class AuthService {
   ) {}
 
   public async signup(body: SignupDto): Promise<SignInResponse> {
-    const _body = new Object({});
-    Object.assign(_body, body);
+    // const _body = new Object({});
+    // Object.assign(_body, body);
+
+    const { ..._body } = body;
 
     // const id = uuid.v4();
     const hash = await argon.hash(body.password);

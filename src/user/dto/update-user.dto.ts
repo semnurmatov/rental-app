@@ -1,14 +1,24 @@
 import { Gender } from '@prisma/client';
 import {
   IsDate,
+  IsDateString,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
   IsString,
   IsUrl,
+  IsUUID,
 } from 'class-validator';
 
 export class UpdateUserDto {
+  @IsNotEmpty()
+  @IsUUID(4)
+  @IsString()
+  id: string;
+
+  // @IsOptional()
+  // email: string;
+
   @IsOptional()
   @IsString()
   firstName: string;
@@ -26,6 +36,7 @@ export class UpdateUserDto {
   gender: Gender;
 
   @IsOptional()
+  @IsDateString()
   birthDate: string;
 
   @IsOptional()

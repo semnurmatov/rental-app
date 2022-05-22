@@ -10,6 +10,7 @@ import { UploadApiResponse } from 'cloudinary';
 import { FOLDERS } from 'src/image/cloudinary/constants';
 import { ImageService } from 'src/image/image.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { formatDate } from 'src/utils/functions';
 import { GetUserDto, UpdateUserDto } from './dto';
 import { UserFactory } from './user.factory';
 
@@ -32,36 +33,34 @@ export class UserService {
     return this.userFactory.format(user);
   }
 
-  async updateUser(id: string, data: UpdateUserDto): Promise<GetUserDto> {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+  async updateUser(data: UpdateUserDto): Promise<GetUserDto> {
+    const user = await this.prisma.user.findUnique({ where: { id: data.id } });
+    console.log(user);
 
     if (!user) {
       throw new NotFoundException('User not found.');
     }
 
     const _data: Prisma.UserUpdateInput = new Object({});
-    if (data.firstName) {
+    if (data.firstName && data.firstName !== user.firstName) {
       Object.assign(_data, { firstName: data.firstName });
     }
-    if (data.lastName) {
+    if (data.lastName && data.lastName !== user.lastName) {
       Object.assign(_data, { lastName: data.lastName });
     }
-    if (data.gender) {
+    if (data.gender && data.gender !== user.gender) {
       Object.assign(_data, { gender: data.gender });
     }
-    if (data.birthDate) {
+    if (data.birthDate && data.birthDate !== formatDate(user.birthDate)) {
       Object.assign(_data, { birthDate: new Date(data.birthDate) });
     }
-    if (data.avatar) {
-      Object.assign(_data, { avatar: data.avatar });
-    }
-    if (data.phoneNumber) {
+    if (data.phoneNumber && data.phoneNumber !== user.phoneNumber) {
       Object.assign(_data, { phoneNumber: data.phoneNumber });
     }
 
     const updatedUser = await this.prisma.user.update({
       data: _data,
-      where: { id },
+      where: { id: data.id },
     });
 
     if (!updatedUser) {
@@ -81,7 +80,7 @@ export class UserService {
     return this.userFactory.format(user);
   }
 
-  public async createUser(data: Prisma.UserCreateInput): Promise<GetUserDto> {
+  async createUser(data: Prisma.UserCreateInput): Promise<GetUserDto> {
     try {
       //check if username(email) already exists
       const isExist = await this.prisma.user.findUnique({
@@ -104,6 +103,24 @@ export class UserService {
     }
   }
 
+  async uploadUserAvatar(id: string, file: Express.Multer.File) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const image = await this.imageService.uploadImage(file, FOLDERS.USERS);
+
+    const updatedUser = await this.prisma.user.update({
+      data: { avatar: image.secure_url },
+      where: { id },
+    });
+
+    return this.userFactory.format(updatedUser);
+  }
+
+  // *** Helper functions ***
   async updateUserRtHash(
     id: Prisma.UserWhereUniqueInput,
     rt: string | null,

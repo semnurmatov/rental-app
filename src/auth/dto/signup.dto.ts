@@ -11,6 +11,9 @@ import {
 } from 'class-validator';
 
 export class SignupDto {
+  //   @IsOptional()
+  //   id: string;
+
   @IsNotEmpty()
   @IsEmail()
   email: string;
