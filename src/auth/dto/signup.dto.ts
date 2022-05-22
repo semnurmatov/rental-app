@@ -1,6 +1,19 @@
-import { IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
+import { Gender } from '@prisma/client';
+import {
+  IsDate,
+  IsDateString,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  IsUrl,
+} from 'class-validator';
 
 export class SignupDto {
+  //   @IsOptional()
+  //   id: string;
+
   @IsNotEmpty()
   @IsEmail()
   email: string;
@@ -18,26 +31,18 @@ export class SignupDto {
   lastName: string;
 
   @IsOptional()
-  @IsString()
+  @IsPhoneNumber()
   phoneNumber: string;
 
   @IsOptional()
   @IsString()
-  gender: string;
+  gender: Gender;
 
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   birthDate: string;
 
   @IsOptional()
   @IsUrl()
   avatar: string;
-
-  @IsOptional()
-  @IsString()
-  lattitude: string;
-
-  @IsOptional()
-  @IsString()
-  longitude: string;
 }

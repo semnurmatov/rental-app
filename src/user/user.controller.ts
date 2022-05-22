@@ -7,7 +7,6 @@ import {
   HttpStatus,
   Param,
   Patch,
-  Post,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,34 +15,35 @@ import { FOLDERS } from 'src/image/cloudinary/constants';
 import { GetUserDto, UpdateUserDto } from './dto';
 import { UserService } from './user.service';
 
-@Controller('/user')
+@Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/:userId')
+  @Get('/:id')
   @HttpCode(HttpStatus.OK)
-  public async getUser(@Param('userId') userId: string): Promise<GetUserDto> {
-    return this.userService.getUser(userId);
+  public async getUser(@Param('id') id: string): Promise<GetUserDto> {
+    return this.userService.getUser(id);
   }
 
-  @Post('/image')
+  @Patch()
+  @HttpCode(HttpStatus.OK)
+  public async updateUser(@Body() data: UpdateUserDto): Promise<GetUserDto> {
+    return this.userService.updateUser(data);
+  }
+
+  @Patch('/avatar/:id')
+  @HttpCode(HttpStatus.OK)
   @UseInterceptors(FileInterceptor('file'))
-  public async uploadUsersImage(@UploadedFile() file: Express.Multer.File) {
-    return this.userService.uploadImage(file, FOLDERS.USERS);
-  }
-
-  @Patch('/:userId')
-  @HttpCode(HttpStatus.OK)
-  public async updateUser(
-    @Param('userId') userId: string,
-    @Body() body: Partial<UpdateUserDto>,
+  public async updateUserAvatar(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<GetUserDto> {
-    return this.userService.updateUser(userId, body);
+    return this.userService.uploadUserAvatar(id, file);
   }
 
-  @Delete('/:userId')
+  @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  public async deleteUser(@Param('userId') userId: string): Promise<boolean> {
-    return this.userService.deleteUser(userId);
+  public async deleteUser(@Param('id') id: string): Promise<GetUserDto> {
+    return this.userService.deleteUser(id);
   }
 }
