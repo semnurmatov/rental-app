@@ -109,7 +109,14 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found.');
     }
-
+    if (user.avatar) {
+      const publicId = await this.userFactory.getFilePublicId(user.avatar);
+      try {
+        await this.imageService.deleteImage(publicId);
+      } catch (e) {
+        console.log(e);
+      }
+    }
     const image = await this.imageService.uploadImage(file, FOLDERS.USERS);
 
     const updatedUser = await this.prisma.user.update({

@@ -28,4 +28,8 @@ export class ImageService {
 
     return images;
   }
+
+  async deleteImage(publicId: string): Promise<boolean> {
+    return this.fileSystemService.deleteFile(publicId);
+  }
 }

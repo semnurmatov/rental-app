@@ -16,6 +16,10 @@ RUN yarn prisma generate
 
 CMD ["yarn", "start:prod"]
 
+# Heroku deploy docker image:
+#  0. heroku container:login -> login to Heroku Container Registry 
+#  1. heroku container:push web -> build image
+#  2. heroku contianer:release web -> deploy image
 
 
 # FROM node:14.17-alpine As build
