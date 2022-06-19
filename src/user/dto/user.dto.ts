@@ -1,6 +1,5 @@
 import { Gender } from '@prisma/client';
 import {
-  IsDate,
   IsDateString,
   IsEmail,
   IsNotEmpty,
@@ -8,19 +7,17 @@ import {
   IsPhoneNumber,
   IsString,
   IsUrl,
+  IsUUID,
 } from 'class-validator';
 
-export class SignupDto {
-  //   @IsOptional()
-  //   id: string;
+export class UserDto {
+  @IsNotEmpty()
+  @IsString()
+  id: string;
 
   @IsNotEmpty()
   @IsEmail()
   email: string;
-
-  @IsNotEmpty()
-  @IsString()
-  password: string;
 
   @IsNotEmpty()
   @IsString()
@@ -31,7 +28,6 @@ export class SignupDto {
   lastName: string;
 
   @IsOptional()
-  @IsPhoneNumber()
   phoneNumber: string;
 
   @IsOptional()
@@ -39,10 +35,8 @@ export class SignupDto {
   gender: Gender;
 
   @IsOptional()
-  @IsDateString()
   birthDate: string;
 
   @IsOptional()
-  @IsUrl()
   avatar: string;
 }

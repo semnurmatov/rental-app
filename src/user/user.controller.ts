@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FOLDERS } from 'src/image/cloudinary/constants';
-import { GetUserDto, UpdateUserDto } from './dto';
+import { UserDto } from './dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -21,13 +21,13 @@ export class UserController {
 
   @Get('/:id')
   @HttpCode(HttpStatus.OK)
-  public async getUser(@Param('id') id: string): Promise<GetUserDto> {
+  public async getUser(@Param('id') id: string): Promise<UserDto> {
     return this.userService.getUser(id);
   }
 
   @Patch()
   @HttpCode(HttpStatus.OK)
-  public async updateUser(@Body() data: UpdateUserDto): Promise<GetUserDto> {
+  public async updateUser(@Body() data: UserDto): Promise<UserDto> {
     return this.userService.updateUser(data);
   }
 
@@ -37,13 +37,13 @@ export class UserController {
   public async updateUserAvatar(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
-  ): Promise<GetUserDto> {
+  ): Promise<string> {
     return this.userService.uploadUserAvatar(id, file);
   }
 
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  public async deleteUser(@Param('id') id: string): Promise<GetUserDto> {
+  public async deleteUser(@Param('id') id: string): Promise<UserDto> {
     return this.userService.deleteUser(id);
   }
 }

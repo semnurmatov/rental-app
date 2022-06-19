@@ -16,10 +16,10 @@ import { ProductService } from './product.service';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  // @Post()
-  // public async createProduct(@Body() body: CreateProductDto) {
-  //   return this.productService.createProduct(body);
-  // }
+  @Post()
+  public async createProduct(@Body() body: CreateProductDto) {
+    return this.productService.createProduct(body);
+  }
 
   // @Patch('/:productId')
   // @HttpCode(HttpStatus.OK)
@@ -38,7 +38,6 @@ export class ProductController {
   @Get('/:productId')
   @HttpCode(HttpStatus.OK)
   public async getProduct(@Param('productId') productId: string) {
-    console.log(123);
     
     return this.productService.getProduct(productId);
   }

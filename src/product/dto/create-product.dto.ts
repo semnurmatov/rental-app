@@ -10,7 +10,12 @@ export class CreateProductDto {
   @IsNotEmpty()
   @IsUUID(4)
   @IsString()
-  userId: string;
+  id: string;
+  
+  @IsNotEmpty()
+  @IsUUID(4)
+  @IsString()
+  authorId: string;
 
   @IsNotEmpty()
   @IsString()

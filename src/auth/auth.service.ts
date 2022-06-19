@@ -8,10 +8,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload, SignInResponse, Tokens } from './types';
 import * as argon from 'argon2';
-import { AuthDto, SignupDto } from './dto';
+import { AuthDto } from './dto';
 import { UserService } from '../user/user.service';
 import { UserFactory } from '../user/user.factory';
 import { Prisma } from '@prisma/client';
+import { CreateUserDto } from 'src/user/dto';
 
 @Injectable()
 export class AuthService {
@@ -21,13 +22,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  public async signup(body: SignupDto): Promise<SignInResponse> {
-    // const _body = new Object({});
-    // Object.assign(_body, body);
+  public async signup(body: CreateUserDto): Promise<SignInResponse> {
+    const { id, ..._body } = body;
 
-    const { ..._body } = body;
-
-    // const id = uuid.v4();
     const hash = await argon.hash(body.password);
     Object.assign(_body, { password: hash });
     Object.assign(_body, { birthDate: new Date(body.birthDate) });

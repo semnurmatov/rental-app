@@ -9,23 +9,20 @@ import { PRODUCT_PROVIDERS } from './constants';
 import { CreateProductDto, UpdateProductDto } from './dto';
 import * as uuid from 'uuid';
 import { UserService } from '../user/user.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class ProductService {
   constructor(
+    private readonly prisma: PrismaService,
     private userService: UserService,
   ) {}
-  // async createProduct(body: CreateProductDto): Promise<Product> {
-  //   const productId = uuid.v4();
-  //   const product: Product = await this.productRepository.create({
-  //     productId,
-  //     userId: body.userId,
-  //     title: body.title,
-  //     description: body.description,
-  //     price: body.price,
-  //   });
-  //   return product;
-  // }
+  async createProduct(body: CreateProductDto): Promise<string> {
+    const productId = uuid.v4();
+
+    return 'string';
+  }
+
   // async updateProduct(
   //   productId: string,
   //   body: Partial<UpdateProductDto>,
@@ -72,14 +69,15 @@ export class ProductService {
   //   }
   //   return true;
   // }
-  async getProduct(productId: string): Promise<string> {
-    // const product = await this.productRepository.findOne({
-    //   where: { productId },
-    // });
-    // if (!product) {
-    //   throw new NotFoundException('Product not found.');
-    // }
-    return productId;
+  async getProduct(id: string): Promise<string> {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+    });
+    if (!product) {
+      throw new NotFoundException('Product not found.');
+    }
+
+    return id;
   }
   // async getAllProducts(): Promise<Product[]> {
   //   const product = await this.productRepository.findAll();

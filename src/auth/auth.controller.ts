@@ -8,9 +8,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { CreateUserDto } from 'src/user/dto';
 import { Public } from '../common';
 import { AuthService } from './auth.service';
-import { AuthDto, SignupDto } from './dto';
+import { AuthDto } from './dto';
 import { RtGuard } from './guards';
 import { SignInResponse } from './types';
 
@@ -20,7 +21,7 @@ export class AuthController {
 
   @Public()
   @Post('/signup')
-  public async signup(@Body() body: SignupDto): Promise<SignInResponse> {
+  public async signup(@Body() body: CreateUserDto): Promise<SignInResponse> {
     return this.authService.signup(body);
   }
 

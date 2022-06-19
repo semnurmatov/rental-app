@@ -1,9 +1,9 @@
 import { User } from '@prisma/client';
 import { formatDate } from 'src/utils/functions';
-import { GetUserDto } from './dto';
+import { UserDto } from './dto';
 
 export class UserFactory {
-  async format(user: User): Promise<GetUserDto> {
+  async format(user: User): Promise<UserDto> {
     return {
       id: user.id,
       email: user.email,

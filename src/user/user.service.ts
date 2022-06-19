@@ -11,7 +11,7 @@ import { FOLDERS } from 'src/image/cloudinary/constants';
 import { ImageService } from 'src/image/image.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { formatDate } from 'src/utils/functions';
-import { GetUserDto, UpdateUserDto } from './dto';
+import { UserDto } from './dto';
 import { UserFactory } from './user.factory';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class UserService {
     private readonly imageService: ImageService,
   ) {}
 
-  async getUser(id: string): Promise<GetUserDto> {
+  async getUser(id: string): Promise<UserDto> {
     const user = await this.prisma.user.findUnique({
       where: { id: id },
     });
@@ -33,9 +33,8 @@ export class UserService {
     return this.userFactory.format(user);
   }
 
-  async updateUser(data: UpdateUserDto): Promise<GetUserDto> {
+  async updateUser(data: UserDto): Promise<UserDto> {
     const user = await this.prisma.user.findUnique({ where: { id: data.id } });
-    console.log(user);
 
     if (!user) {
       throw new NotFoundException('User not found.');
@@ -70,7 +69,7 @@ export class UserService {
     return this.userFactory.format(updatedUser);
   }
 
-  async deleteUser(id: string): Promise<GetUserDto> {
+  async deleteUser(id: string): Promise<UserDto> {
     const user = await this.prisma.user.findUnique({ where: { id } });
 
     if (!user) {
@@ -80,7 +79,7 @@ export class UserService {
     return this.userFactory.format(user);
   }
 
-  async createUser(data: Prisma.UserCreateInput): Promise<GetUserDto> {
+  async createUser(data: Prisma.UserCreateInput): Promise<UserDto> {
     try {
       //check if username(email) already exists
       const isExist = await this.prisma.user.findUnique({
@@ -124,7 +123,7 @@ export class UserService {
       where: { id },
     });
 
-    return this.userFactory.format(updatedUser);
+    return updatedUser.avatar;
   }
 
   // *** Helper functions ***

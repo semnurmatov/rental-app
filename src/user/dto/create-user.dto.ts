@@ -7,13 +7,11 @@ import {
   IsPhoneNumber,
   IsString,
   IsUrl,
-  IsUUID,
   MinLength,
 } from 'class-validator';
 
 export class CreateUserDto {
   @IsNotEmpty()
-  @IsUUID(4)
   @IsString()
   id: string;
 
