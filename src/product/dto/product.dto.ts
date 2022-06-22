@@ -1,15 +1,17 @@
 import {
-  IsBoolean,
   IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
   IsUUID,
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
 } from 'class-validator';
 import { ImageInfo } from '../types';
 
-export class CreateProductDto {
+export class ProductDto {
   @IsNotEmpty()
+  @IsUUID(4)
+  @IsString()
   id: string;
 
   @IsNotEmpty()
@@ -17,7 +19,7 @@ export class CreateProductDto {
   @IsString()
   authorId: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   title: string;
 
@@ -25,15 +27,15 @@ export class CreateProductDto {
   @IsString()
   description: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   price: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   currencyId: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsBoolean()
   isAvailable: boolean;
 

@@ -8,17 +8,50 @@ import {
   Param,
   Patch,
   Post,
+  Query,
+  UploadedFile,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
-import { CreateProductDto, UpdateProductDto } from './dto';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { Currency, Prisma } from '@prisma/client';
+import { CreateProductDto } from './dto';
 import { ProductService } from './product.service';
+import { ImageInfo } from './types';
 
-@Controller('product')
+@Controller('')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @Post()
+  @Get('/product/:id')
+  @HttpCode(HttpStatus.OK)
+  public async getProduct(@Param('id') productId: string) {
+    return this.productService.getProduct(productId);
+  }
+
+  @Get('product')
+  @HttpCode(HttpStatus.OK)
+  public async getAllProducts() {
+    return this.productService.getAllProducts();
+  }
+
+  @Post('/product')
   public async createProduct(@Body() body: CreateProductDto) {
     return this.productService.createProduct(body);
+  }
+
+  @Post('/product/image')
+  @UseInterceptors(FileInterceptor('file'))
+  public async uploadProductImage(@UploadedFile() file: Express.Multer.File) {
+    return this.productService.uploadProductImage(file);
+  }
+
+  @Post('/product/images')
+  @UseInterceptors(AnyFilesInterceptor())
+  public async uploadMultipleProductImages(
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    return this.productService.uploadMultipleProductImages(files);
   }
 
   // @Patch('/:productId')
@@ -30,16 +63,20 @@ export class ProductController {
   //   return this.productService.updateProduct(productId, body);
   // }
 
-  // @Delete('/:productId')
-  // public async deteleProduct(@Param('productId') productId: string) {
-  //   return this.productService.deleteProduct(productId);
-  // }
-
-  @Get('/:productId')
+  @Delete('product/temp/images')
   @HttpCode(HttpStatus.OK)
-  public async getProduct(@Param('productId') productId: string) {
-    
-    return this.productService.getProduct(productId);
+  public async deleteTempImages(@Body() imagesInfo: ImageInfo[]) {
+    return this.productService.deleteTempImages(imagesInfo);
+  }
+
+  @Delete('product/temp/image')
+  public async deteleTempImage(@Body() imageId: ImageInfo) {
+    return this.productService.deleteTempImage(imageId);
+  }
+
+  @Delete('product/:productId')
+  public async deteleProduct(@Param('productId') productId: string) {
+    return this.productService.deleteProduct(productId);
   }
 
   // // @Get('/user-products/:userId')
@@ -48,9 +85,9 @@ export class ProductController {
   // //   return this.productService.getUserProducts(userId);
   // // }
 
-  // @Get()
-  // @HttpCode(HttpStatus.OK)
-  // public async getAllProducts() {
-  //   return this.productService.getAllProducts();
-  // }
+  @Get('/currency-list')
+  @HttpCode(HttpStatus.OK)
+  public async getCurrencyList(): Promise<Currency[]> {
+    return this.productService.getCurrencyList();
+  }
 }

@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { FileSystemService } from './cloudinary/file-system.service';
-import { ImageController } from './image.controller';
-import { ImageService } from './image.service';
+import { FileSystemService } from './file-system.service';
 import { CloudinaryProvider } from './cloudinary/cloudinary.provider';
+import { FileSystemController } from './file-system.controller';
 
 @Module({
   imports: [
@@ -14,8 +13,8 @@ import { CloudinaryProvider } from './cloudinary/cloudinary.provider';
       }),
     }),
   ],
-  controllers: [ImageController],
-  providers: [ImageService, FileSystemService, CloudinaryProvider],
-  exports: [ImageService, FileSystemService],
+  controllers: [FileSystemController],
+  providers: [FileSystemService, CloudinaryProvider],
+  exports: [FileSystemService],
 })
-export class ImageModule {}
+export class FileSystemModule {}

@@ -1,28 +1,115 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
-  Inject,
   Injectable,
   NotFoundException,
+  NotImplementedException,
 } from '@nestjs/common';
-import { PRODUCT_PROVIDERS } from './constants';
-import { CreateProductDto, UpdateProductDto } from './dto';
-import * as uuid from 'uuid';
-import { UserService } from '../user/user.service';
+import { CreateProductDto, ProductDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma, Product, ProductImage } from '@prisma/client';
+import { FOLDERS } from 'src/file-system/cloudinary/constants';
+import { FileSystemService } from 'src/file-system/file-system.service';
+import { ImageInfo, ProductAndProductImage } from './types';
+import { UploadApiResponse } from 'cloudinary';
 
 @Injectable()
 export class ProductService {
   constructor(
     private readonly prisma: PrismaService,
-    private userService: UserService,
+    private fileSystemService: FileSystemService,
   ) {}
-  async createProduct(body: CreateProductDto): Promise<string> {
-    const productId = uuid.v4();
 
-    return 'string';
+  async getProduct(id: string): Promise<Product> {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+    });
+    if (!product) {
+      throw new NotFoundException('Product not found.');
+    }
+
+    return product;
   }
 
+  async getAllProducts(): Promise<Product[]> {
+    return this.prisma.product.findMany();
+  }
+
+  async createProduct(body: CreateProductDto): Promise<ProductDto> {
+    const { id, imageInfo, ...data } = body;
+    let createdImages: ImageInfo[] = [];
+
+    const createProduct = await this.prisma.product.create({ data });
+
+    for (const image of imageInfo) {
+      const renamedFile: UploadApiResponse =
+        await this.fileSystemService.renameFile(image.publicId);
+
+      if (renamedFile) {
+        const newImage = {
+          publicId: renamedFile.public_id,
+          productId: createProduct.id,
+          url: renamedFile.secure_url,
+        };
+
+        const createProductImage: ProductImage =
+          await this.prisma.productImage.create({
+            data: newImage as Prisma.ProductImageCreateInput,
+          });
+        createdImages.push(createProductImage);
+      }
+    }
+    const product = Object.assign({}, createProduct, {
+      imageInfo: createdImages,
+    });
+
+    return product;
+  }
+
+  async uploadMultipleProductImages(
+    files: Array<Express.Multer.File>,
+  ): Promise<ImageInfo[]> {
+    let imageData: ImageInfo[] = [];
+
+    for (const file of files) {
+      const image = await this.fileSystemService.uploadFile(file, FOLDERS.TEMP);
+
+      const data = {
+        url: image.secure_url,
+        publicId: image.public_id,
+      } as ImageInfo;
+
+      imageData.push(data);
+    }
+
+    return imageData;
+  }
+
+  async uploadProductImage(file: Express.Multer.File): Promise<ImageInfo> {
+    const image = await this.fileSystemService.uploadFile(file, FOLDERS.TEMP);
+
+    return {
+      url: image.secure_url,
+      publicId: image.public_id,
+    } as ImageInfo;
+  }
+
+  async deleteTempImage(imageInfo: ImageInfo) {
+    const deleteImage = await this.fileSystemService.deleteFile(
+      imageInfo.publicId,
+    );
+    if (!deleteImage) {
+      throw new BadRequestException();
+    }
+    return imageInfo;
+  }
+
+  async deleteTempImages(imagesInfo: ImageInfo[]) {
+    const imagesIds = imagesInfo.map((imageInfo) => imageInfo.publicId);
+
+    return this.fileSystemService.deleteMultipleFile(imagesIds);
+  }
   // async updateProduct(
   //   productId: string,
   //   body: Partial<UpdateProductDto>,
@@ -54,44 +141,54 @@ export class ProductService {
   //   }
   //   return updatedProduct;
   // }
-  // async deleteProduct(productId: string): Promise<boolean> {
-  //   const product = await this.productRepository.findOne({
-  //     where: { productId },
-  //   });
-  //   if (!product) {
-  //     throw new NotFoundException('Product not found.');
-  //   }
-  //   const isDeleted = await this.productRepository.destroy({
-  //     where: { productId },
-  //   });
-  //   if (isDeleted < 1) {
-  //     return false;
-  //   }
-  //   return true;
-  // }
-  async getProduct(id: string): Promise<string> {
-    const product = await this.prisma.product.findUnique({
-      where: { id },
-    });
-    if (!product) {
-      throw new NotFoundException('Product not found.');
-    }
+  async deleteProduct(id: string): Promise<Product> {
+    try {
+      const products: ProductAndProductImage[] = await this.prisma
+        .$queryRaw`SELECT product.id as productId, productimage.id as productImageId, productimage.publicId FROM product INNER JOIN productimage ON product.id = productimage.productId`;
 
-    return id;
+      if (!products) {
+        throw new NotFoundException('Product not found.');
+      }
+      const deleteImages: Prisma.BatchPayload =
+        await this.prisma.productImage.deleteMany({
+          where: {
+            productId: id,
+          },
+        });
+
+      const deleteImagesCloudinary =
+        await this.fileSystemService.deleteMultipleFile(
+          products.map((product) => product.publicId),
+        );
+
+      const deletedProduct = await this.prisma.product.delete({
+        where: { id },
+      });
+      if (
+        deleteImages.count < 1 ||
+        !deleteImagesCloudinary ||
+        !deletedProduct
+      ) {
+        throw new HttpException(
+          'Product or Images is/are not deleted',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      return deletedProduct;
+    } catch (e) {
+      console.log(e);
+    }
   }
-  // async getAllProducts(): Promise<Product[]> {
-  //   const product = await this.productRepository.findAll();
-  //   return product;
+
+  // async getUserProducts(userId: string): Promise<Product[]> {
+  //   const user = await this.userService.getUserById(userId);
+  //   const products = await this.productRepository.findAll({
+  //     where: {
+  //       userId,
+  //     },
+  //   });
+  //   return products;
   // }
-  // // async getUserProducts(userId: string): Promise<Product[]> {
-  // //   const user = await this.userService.getUserById(userId);
-  // //   const products = await this.productRepository.findAll({
-  // //     where: {
-  // //       userId,
-  // //     },
-  // //   });
-  // //   return products;
-  // // }
   // private async getProductById(productId: string): Promise<Product> {
   //   const product = await this.productRepository.findOne({
   //     where: { productId },
@@ -101,4 +198,8 @@ export class ProductService {
   //   }
   //   return product;
   // }
+
+  async getCurrencyList() {
+    return this.prisma.currency.findMany();
+  }
 }

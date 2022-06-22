@@ -11,7 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FOLDERS } from 'src/image/cloudinary/constants';
+import { FOLDERS } from 'src/file-system/cloudinary/constants';
 import { UserDto } from './dto';
 import { UserService } from './user.service';
 

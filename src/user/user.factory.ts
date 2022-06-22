@@ -1,4 +1,5 @@
 import { User } from '@prisma/client';
+import { FOLDERS } from 'src/file-system/cloudinary/constants';
 import { formatDate } from 'src/utils/functions';
 import { UserDto } from './dto';
 
@@ -14,13 +15,5 @@ export class UserFactory {
       birthDate: formatDate(user.birthDate),
       avatar: user.avatar,
     };
-  }
-
-  async getFilePublicId(url: string): Promise<string> {
-    let publicId: string;
-    if (url.includes('users')) {
-      publicId = 'users/' + url.split('users/')[1].split('.')[0];
-    }
-    return publicId;
   }
 }

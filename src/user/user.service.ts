@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { UploadApiResponse } from 'cloudinary';
-import { FOLDERS } from 'src/image/cloudinary/constants';
-import { ImageService } from 'src/image/image.service';
+import { FOLDERS } from 'src/file-system/cloudinary/constants';
+import { FileSystemService } from 'src/file-system/file-system.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { formatDate } from 'src/utils/functions';
 import { UserDto } from './dto';
@@ -19,7 +19,7 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly userFactory: UserFactory,
-    private readonly imageService: ImageService,
+    private readonly fileSystemService: FileSystemService,
   ) {}
 
   async getUser(id: string): Promise<UserDto> {
@@ -109,14 +109,16 @@ export class UserService {
       throw new NotFoundException('User not found.');
     }
     if (user.avatar) {
-      const publicId = await this.userFactory.getFilePublicId(user.avatar);
+      const publicId = await this.fileSystemService.getFilePublicId(
+        user.avatar,
+      );
       try {
-        await this.imageService.deleteImage(publicId);
+        await this.fileSystemService.deleteFile(publicId);
       } catch (e) {
         console.log(e);
       }
     }
-    const image = await this.imageService.uploadImage(file, FOLDERS.USERS);
+    const image = await this.fileSystemService.uploadFile(file, FOLDERS.USERS);
 
     const updatedUser = await this.prisma.user.update({
       data: { avatar: image.secure_url },
