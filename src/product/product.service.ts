@@ -1,17 +1,23 @@
 import {
   BadRequestException,
+  ConflictException,
   HttpException,
   HttpStatus,
   Injectable,
   NotFoundException,
-  NotImplementedException,
 } from '@nestjs/common';
 import { CreateProductDto, ProductDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma, Product, ProductImage } from '@prisma/client';
+import {
+  Category,
+  Prisma,
+  Product,
+  ProductCategory,
+  ProductImage,
+} from '@prisma/client';
 import { FOLDERS } from 'src/file-system/cloudinary/constants';
 import { FileSystemService } from 'src/file-system/file-system.service';
-import { ImageInfo, ProductAndProductImage } from './types';
+import { CreateCategory, ImageInfo, ProductAndProductImage } from './types';
 import { UploadApiResponse } from 'cloudinary';
 
 @Injectable()
@@ -21,7 +27,7 @@ export class ProductService {
     private fileSystemService: FileSystemService,
   ) {}
 
-  async getProduct(id: string): Promise<Product> {
+  async getProduct(id: string): Promise<ProductDto> {
     const product = await this.prisma.product.findUnique({
       where: { id },
     });
@@ -29,40 +35,93 @@ export class ProductService {
       throw new NotFoundException('Product not found.');
     }
 
-    return product;
+    const productImage: ProductImage[] =
+      await this.prisma.productImage.findMany({
+        where: { productId: product.id },
+      });
+
+    const productCategory = await this.prisma.productCategory.findFirst({
+      where: { productId: product.id },
+      include: {
+        category: {
+          select: {
+            id: true,
+            title: true,
+            parentId: true,
+          },
+        },
+      },
+    });
+
+    const productDto: ProductDto = Object.assign(
+      {},
+      product,
+      { imageInfo: productImage },
+      { category: productCategory.category },
+    );
+
+    return productDto;
   }
 
-  async getAllProducts(): Promise<Product[]> {
-    return this.prisma.product.findMany();
+  async getAllProducts(): Promise<ProductDto[]> {
+    const products = await this.prisma.product.findMany();
+    const allProducts: ProductDto[] = [];
+
+    for (const product of products) {
+      const productImage: ProductImage[] =
+        await this.prisma.productImage.findMany({
+          where: { productId: product.id },
+        });
+
+      const productCategory = await this.prisma.productCategory.findFirst({
+        where: { productId: product.id },
+        include: {
+          category: {
+            select: {
+              id: true,
+              title: true,
+              parentId: true,
+            },
+          },
+        },
+      });
+
+      const productDto: ProductDto = Object.assign(
+        {},
+        product,
+        { imageInfo: productImage },
+        { category: productCategory.category },
+      );
+
+      allProducts.push(productDto);
+    }
+    return allProducts;
   }
 
   async createProduct(body: CreateProductDto): Promise<ProductDto> {
-    const { id, imageInfo, ...data } = body;
-    let createdImages: ImageInfo[] = [];
+    const { id, imageInfo, category, ...data } = body;
 
     const createProduct = await this.prisma.product.create({ data });
 
-    for (const image of imageInfo) {
-      const renamedFile: UploadApiResponse =
-        await this.fileSystemService.renameFile(image.publicId);
-
-      if (renamedFile) {
-        const newImage = {
-          publicId: renamedFile.public_id,
-          productId: createProduct.id,
-          url: renamedFile.secure_url,
-        };
-
-        const createProductImage: ProductImage =
-          await this.prisma.productImage.create({
-            data: newImage as Prisma.ProductImageCreateInput,
-          });
-        createdImages.push(createProductImage);
-      }
-    }
-    const product = Object.assign({}, createProduct, {
-      imageInfo: createdImages,
+    const productCategory = await this.prisma.productCategory.create({
+      data: { productId: createProduct.id, categoryId: category.id },
     });
+
+    const createdImages = await this.imagesFromTempToProduct(
+      createProduct,
+      imageInfo,
+    );
+
+    const product: ProductDto = Object.assign(
+      {},
+      createProduct,
+      {
+        imageInfo: createdImages,
+      },
+      {
+        category: category,
+      },
+    );
 
     return product;
   }
@@ -141,6 +200,7 @@ export class ProductService {
   //   }
   //   return updatedProduct;
   // }
+
   async deleteProduct(id: string): Promise<Product> {
     try {
       const products: ProductAndProductImage[] = await this.prisma
@@ -180,26 +240,60 @@ export class ProductService {
     }
   }
 
-  // async getUserProducts(userId: string): Promise<Product[]> {
-  //   const user = await this.userService.getUserById(userId);
-  //   const products = await this.productRepository.findAll({
-  //     where: {
-  //       userId,
-  //     },
-  //   });
-  //   return products;
-  // }
-  // private async getProductById(productId: string): Promise<Product> {
-  //   const product = await this.productRepository.findOne({
-  //     where: { productId },
-  //   });
-  //   if (!product) {
-  //     throw new NotFoundException('Product not found.');
-  //   }
-  //   return product;
-  // }
+  public async imagesFromTempToProduct(
+    product: Product,
+    imageInfo: ImageInfo[],
+  ): Promise<ProductImage[]> {
+    let createdImages: ProductImage[] = [];
+
+    for (const image of imageInfo) {
+      const renamedFile: UploadApiResponse =
+        await this.fileSystemService.renameFile(image.publicId);
+
+      if (renamedFile) {
+        const newImage = {
+          publicId: renamedFile.public_id,
+          productId: product.id,
+          url: renamedFile.secure_url,
+        };
+
+        const createProductImage: ProductImage =
+          await this.prisma.productImage.create({
+            data: newImage as Prisma.ProductImageCreateInput,
+          });
+        createdImages.push(createProductImage);
+      }
+    }
+
+    return createdImages;
+  }
 
   async getCurrencyList() {
     return this.prisma.currency.findMany();
+  }
+
+  async getCategories(): Promise<Category[]> {
+    return this.prisma.category.findMany();
+  }
+
+  /*
+  ----  Helper Functions ----
+  */
+
+  // Create Category
+  async createCategory(createCategory: CreateCategory) {
+    const categories = await this.prisma.category.findMany();
+
+    for (const category of categories) {
+      if (category.title === createCategory.title) {
+        throw new ConflictException('Category with this name already exists.');
+      }
+    }
+
+    const createCat = await this.prisma.category.create({
+      data: createCategory,
+    });
+
+    return createCat;
   }
 }

@@ -1,3 +1,4 @@
+import { Category, ProductImage } from '@prisma/client';
 import {
   IsNotEmpty,
   IsUUID,
@@ -6,7 +7,6 @@ import {
   IsNumber,
   IsBoolean,
 } from 'class-validator';
-import { ImageInfo } from '../types';
 
 export class ProductDto {
   @IsNotEmpty()
@@ -40,5 +40,9 @@ export class ProductDto {
   isAvailable: boolean;
 
   @IsNotEmpty()
-  imageInfo: ImageInfo[];
+  imageInfo: ProductImage[];
+
+  @IsNotEmpty()
+  @IsString()
+  category: Category;
 }

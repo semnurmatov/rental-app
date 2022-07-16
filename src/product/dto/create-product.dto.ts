@@ -1,3 +1,4 @@
+import { Category } from '@prisma/client';
 import {
   IsBoolean,
   IsNotEmpty,
@@ -39,4 +40,8 @@ export class CreateProductDto {
 
   @IsNotEmpty()
   imageInfo: ImageInfo[];
+
+  @IsNotEmpty()
+  @IsString()
+  category: Category;
 }

@@ -58,6 +58,7 @@ model Product{
   currencyId String
   productImages ProductImage[]
   reviews Review[]
+  productCategory ProductCategory[]
 }
 
 model Currency{
@@ -88,6 +89,29 @@ model ProductImage{
   // Relation fields
   product Product? @relation(fields: [productId], references: [id])
   productId String
+}
+
+model Category {
+  id String @id @default(uuid())
+  title String @unique
+  
+  // Relation fields
+  subCategories Category[] @relation("SubCategory")
+  parent Category? @relation("SubCategory", fields: [parentId], references: [id])
+  parentId String?
+
+  productCategory ProductCategory[]
+}
+
+model ProductCategory {
+  id String @id @default(uuid())
+
+  // Relation fields
+  product Product @relation(fields: [productId], references: [id])
+  productId String
+
+  category Category @relation(fields: [categoryId], references: [id])
+  categoryId String
 }
 
 enum Gender{

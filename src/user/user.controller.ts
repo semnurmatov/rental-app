@@ -41,6 +41,8 @@ export class UserController {
     return this.userService.uploadUserAvatar(id, file);
   }
 
+  //@TODO Delete User Avatar
+
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
   public async deleteUser(@Param('id') id: string): Promise<UserDto> {

@@ -14,10 +14,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
-import { Currency, Prisma } from '@prisma/client';
+import { Category, Currency } from '@prisma/client';
 import { CreateProductDto } from './dto';
 import { ProductService } from './product.service';
-import { ImageInfo } from './types';
+import { CreateCategory, ImageInfo } from './types';
 
 @Controller('')
 export class ProductController {
@@ -29,7 +29,7 @@ export class ProductController {
     return this.productService.getProduct(productId);
   }
 
-  @Get('product')
+  @Get('/product')
   @HttpCode(HttpStatus.OK)
   public async getAllProducts() {
     return this.productService.getAllProducts();
@@ -63,18 +63,18 @@ export class ProductController {
   //   return this.productService.updateProduct(productId, body);
   // }
 
-  @Delete('product/temp/images')
+  @Delete('/product/temp/images')
   @HttpCode(HttpStatus.OK)
   public async deleteTempImages(@Body() imagesInfo: ImageInfo[]) {
     return this.productService.deleteTempImages(imagesInfo);
   }
 
-  @Delete('product/temp/image')
+  @Delete('/product/temp/image')
   public async deteleTempImage(@Body() imageId: ImageInfo) {
     return this.productService.deleteTempImage(imageId);
   }
 
-  @Delete('product/:productId')
+  @Delete('/product/:productId')
   public async deteleProduct(@Param('productId') productId: string) {
     return this.productService.deleteProduct(productId);
   }
@@ -89,5 +89,21 @@ export class ProductController {
   @HttpCode(HttpStatus.OK)
   public async getCurrencyList(): Promise<Currency[]> {
     return this.productService.getCurrencyList();
+  }
+
+  @Get('/categories')
+  @HttpCode(HttpStatus.OK)
+  public async getCategories(): Promise<Category[]> {
+    return this.productService.getCategories();
+  }
+
+  /*
+  ----  Helper Functions ----
+  */
+
+  // Create Category
+  @Post('/product/category')
+  public async createCategory(@Body() createCategory: CreateCategory) {
+    return this.productService.createCategory(createCategory);
   }
 }
