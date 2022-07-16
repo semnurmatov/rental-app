@@ -8,13 +8,7 @@ import {
 } from '@nestjs/common';
 import { CreateProductDto, ProductDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import {
-  Category,
-  Prisma,
-  Product,
-  ProductCategory,
-  ProductImage,
-} from '@prisma/client';
+import { Category, Prisma, Product, ProductImage } from '@prisma/client';
 import { FOLDERS } from 'src/file-system/cloudinary/constants';
 import { FileSystemService } from 'src/file-system/file-system.service';
 import { CreateCategory, ImageInfo, ProductAndProductImage } from './types';
