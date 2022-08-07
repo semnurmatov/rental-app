@@ -1,18 +1,35 @@
-FROM node:14.17-alpine
+FROM node:alpine AS development
 
 WORKDIR /app
 
 COPY package.json yarn.lock ./
-
 COPY prisma ./prisma/
 
-RUN yarn --frozen-lockfile
+# COPY .env ./
+
+RUN yarn --only=development
 
 COPY . .
 
 RUN yarn build
 
-RUN yarn prisma generate
+
+FROM node:alpine AS production
+
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+COPY prisma ./prisma/
+
+
+RUN yarn --only=production
+
+COPY . .
+
+COPY --from=development /app/dist ./dist
 
 CMD ["yarn", "start:prod"]
 

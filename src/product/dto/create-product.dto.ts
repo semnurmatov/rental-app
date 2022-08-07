@@ -42,6 +42,5 @@ export class CreateProductDto {
   imageInfo: ImageInfo[];
 
   @IsNotEmpty()
-  @IsString()
   category: Category;
 }

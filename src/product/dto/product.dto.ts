@@ -39,10 +39,9 @@ export class ProductDto {
   @IsBoolean()
   isAvailable: boolean;
 
-  @IsNotEmpty()
+  @IsOptional()
   imageInfo: ProductImage[];
 
-  @IsNotEmpty()
-  @IsString()
+  @IsOptional()
   category: Category;
 }

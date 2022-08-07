@@ -15,7 +15,8 @@ import {
 } from '@nestjs/common';
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { Category, Currency } from '@prisma/client';
-import { CreateProductDto } from './dto';
+import { PaginationParams } from 'src/utils/types';
+import { CreateProductDto, ProductDto } from './dto';
 import { ProductService } from './product.service';
 import { CreateCategory, ImageInfo } from './types';
 
@@ -25,14 +26,26 @@ export class ProductController {
 
   @Get('/product/:id')
   @HttpCode(HttpStatus.OK)
-  public async getProduct(@Param('id') productId: string) {
+  public async getProduct(@Param('id') productId: string): Promise<ProductDto> {
     return this.productService.getProduct(productId);
   }
 
   @Get('/product')
   @HttpCode(HttpStatus.OK)
-  public async getAllProducts() {
+  public async getAllProducts(): Promise<ProductDto[]> {
     return this.productService.getAllProducts();
+  }
+
+  @Get('/product-offset')
+  @HttpCode(HttpStatus.OK)
+  public async getProductsWithOffset(
+    @Query('search') search: string,
+    @Query() { offset, limit }: PaginationParams,
+  ): Promise<ProductDto[]> {
+    if (search) {
+      return this.productService.searchProducts(search, offset, limit);
+    }
+    return this.productService.getProductsWithOffset(offset, limit);
   }
 
   @Post('/product')
@@ -54,14 +67,11 @@ export class ProductController {
     return this.productService.uploadMultipleProductImages(files);
   }
 
-  // @Patch('/:productId')
-  // @HttpCode(HttpStatus.OK)
-  // public async updateProduct(
-  //   @Param('productId') productId: string,
-  //   @Body() body: Partial<UpdateProductDto>,
-  // ) {
-  //   return this.productService.updateProduct(productId, body);
-  // }
+  @Patch('/:productId')
+  @HttpCode(HttpStatus.OK)
+  public async updateProduct(@Body() body: ProductDto) {
+    return this.productService.updateProduct(body);
+  }
 
   @Delete('/product/temp/images')
   @HttpCode(HttpStatus.OK)
