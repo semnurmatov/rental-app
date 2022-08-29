@@ -6,11 +6,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
-import { UploadApiResponse } from 'cloudinary';
-import { FOLDERS } from 'src/file-system/cloudinary/constants';
-import { FileSystemService } from 'src/file-system/file-system.service';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { formatDate } from 'src/utils/functions';
+import { FOLDERS } from '../file-system/cloudinary/constants';
+import { FileSystemService } from '../file-system/file-system.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { formatDate } from '../utils/functions';
 import { UserDto } from './dto';
 import { UserFactory } from './user.factory';
 

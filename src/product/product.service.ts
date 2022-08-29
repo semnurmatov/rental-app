@@ -7,12 +7,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateProductDto, ProductDto } from './dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { Category, Prisma, Product, ProductImage } from '@prisma/client';
-import { FOLDERS } from 'src/file-system/cloudinary/constants';
-import { FileSystemService } from 'src/file-system/file-system.service';
 import { CreateCategory, ImageInfo } from './types';
 import { UploadApiResponse } from 'cloudinary';
+import { FOLDERS } from '../file-system/cloudinary/constants';
+import { FileSystemService } from '../file-system/file-system.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ProductService {

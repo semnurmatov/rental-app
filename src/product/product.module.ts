@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { FileSystemModule } from 'src/file-system/file-system.module';
-import { FileSystemService } from 'src/file-system/file-system.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { FileSystemModule } from '../file-system/file-system.module';
+import { FileSystemService } from '../file-system/file-system.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { UserModule } from '../user/user.module';
 import { ProductController } from './product.controller';
 import { ProductService } from './product.service';

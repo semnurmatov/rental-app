@@ -1,6 +1,5 @@
 import { User } from '@prisma/client';
-import { FOLDERS } from 'src/file-system/cloudinary/constants';
-import { formatDate } from 'src/utils/functions';
+import { formatDate } from '../utils/functions';
 import { UserDto } from './dto';
 
 export class UserFactory {

@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { Category, Currency } from '@prisma/client';
-import { PaginationParams } from 'src/utils/types';
+import { PaginationParams } from '../utils/types';
 import { CreateProductDto, ProductDto } from './dto';
 import { ProductService } from './product.service';
 import { CreateCategory, ImageInfo } from './types';
