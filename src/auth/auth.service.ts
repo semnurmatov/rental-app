@@ -12,7 +12,7 @@ import { AuthDto } from './dto';
 import { UserService } from '../user/user.service';
 import { UserFactory } from '../user/user.factory';
 import { Prisma } from '@prisma/client';
-import { CreateUserDto } from 'src/user/dto';
+import { CreateUserDto } from '../user/dto';
 
 @Injectable()
 export class AuthService {

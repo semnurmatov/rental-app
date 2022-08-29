@@ -8,8 +8,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { CreateUserDto } from 'src/user/dto';
 import { Public } from '../common';
+import { CreateUserDto } from '../user/dto';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 import { RtGuard } from './guards';
