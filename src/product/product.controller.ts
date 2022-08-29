@@ -67,6 +67,7 @@ export class ProductController {
     return this.productService.uploadMultipleProductImages(files);
   }
 
+  //Delete :productId, since ID is included in body
   @Patch('/:productId')
   @HttpCode(HttpStatus.OK)
   public async updateProduct(@Body() body: ProductDto) {

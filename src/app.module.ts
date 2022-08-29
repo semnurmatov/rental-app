@@ -11,6 +11,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './auth/guards';
 import { FileSystemController } from './file-system/file-system.controller';
 import { FileSystemModule } from './file-system/file-system.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { FileSystemModule } from './file-system/file-system.module';
     FileSystemModule,
     ReviewModule,
     AuthModule,
+    ChatModule,
   ],
   controllers: [AppController, FileSystemController, ReviewController],
   providers: [
